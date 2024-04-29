@@ -55,7 +55,8 @@ export const signup = async (req: Request, res: Response) => {
       const otp = generateAndStoreOTP(user);
 
       sendDbNotification(email, telephone, 
-        `Welcome to ${appName}!`, `🎉 Dear ${user.fullname},\n\nWelcome to Our ${appName}! We're excited to have you on board. your OTP code ise ${otp}`
+        `Welcome to ${appName}!`, `🎉 Dear ${user.fullname},\n\nWelcome to Our ${appName}! We're excited to have you on board. your OTP code ise ${otp}`,
+        user
       );
 
       res.status(201).send({
@@ -184,7 +185,7 @@ export const requestOTPCode = async (req: Request, res: Response) => {
 
       const otp = generateAndStoreOTP(user);
 
-      sendDbNotification(email, "", `Your One-Time Password (OTP) for ${appName} Verification`, `Hello, \n Thank you for using our service. Your One-Time Password (OTP) for account verification is: \n [${otp}] \n Please use this code within the next [5 min] minutes. If you did not request this code, please ignore this email.`);
+      sendDbNotification(email, "", `Your One-Time Password (OTP) for ${appName} Verification`, `Hello, \n Thank you for using our service. Your One-Time Password (OTP) for account verification is: \n [${otp}] \n Please use this code within the next [5 min] minutes. If you did not request this code, please ignore this email.`, user);
      
       res.status(200).send({
         status: "success",

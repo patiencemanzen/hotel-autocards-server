@@ -5,6 +5,7 @@ interface INotification extends Document {
   phoneNumber?: string;
   subject: string;
   message: string;
+  user: string;
 }
 
 const notificationSchema = new Schema<INotification>(
@@ -13,6 +14,7 @@ const notificationSchema = new Schema<INotification>(
     phoneNumber: { type: String, required: false },
     subject: { type: String, required: true },
     message: { type: String, required: true },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true } as unknown
   },
   { timestamps: true }
 );

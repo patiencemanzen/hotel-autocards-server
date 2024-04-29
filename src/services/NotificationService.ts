@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { tryCatch } from "../helpers/general-helpers";
 import dotenv from "dotenv";
-import { Notification } from "../models";
+import { IUserModel, Notification } from "../models";
 import Mailgun from 'mailgun-js';
 
 dotenv.config();
@@ -47,11 +47,12 @@ export const sendEmailNotifation = async (email: any, subject: any, message: any
  * @param message 
  * @returns 
  */
-export const sendDbNotification = async (email: any, telephone: any, subject: any, message: any) => {
+export const sendDbNotification = async (email: any, telephone: any, subject: any, message: any, user: IUserModel) => {
   await Notification.create({
     email: email,
     phoneNumber: telephone,
     subject: subject,
     message: message,
+    user: user
   });
 }
