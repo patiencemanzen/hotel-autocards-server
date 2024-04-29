@@ -21,9 +21,6 @@ router.post('/new-password', loginRequest, authController.newCredentials);
 router.get('/oauth/google', passport.authenticate('google', { scope: ['profile', 'email'] }))
 router.post('/oauth/google/callback', passport.authenticate('google', { failureRedirect: '/' }), authController.googleOauthCallback);
 
-router.get('/oauth/github', passport.authenticate('github', { scope: ['profile', 'email'] }))
-router.post('/oauth/github/callback', passport.authenticate('github', { failureRedirect: '/' }), authController.googleOauthCallback);
-
 /**
  * ----------------------------------------------
  * USER PREFERENCES ROUTES

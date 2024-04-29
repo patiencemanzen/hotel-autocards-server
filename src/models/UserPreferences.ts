@@ -8,8 +8,6 @@ interface IUserPreferences extends Document {
     state: string;
     postalCode: string;
   };
-  created_at: Date;
-  updated_at: Date;
 }
 
 const userPreferencesSchema = new Schema<IUserPreferences>({
@@ -20,9 +18,7 @@ const userPreferencesSchema = new Schema<IUserPreferences>({
     state: { type: Schema.Types.String },
     postalCode: { type: Schema.Types.String },
   },
-  created_at: { type: Schema.Types.Date, default: Date.now },
-  updated_at: { type: Schema.Types.Date, default: Date.now },
-});
+}, { timestamps: true });
 
 const UserPreferences = mongoose.model<IUserPreferences>(
   "User_preferences",

@@ -34,7 +34,6 @@ export const storeUserPreferences = async (req: Request, res: Response) => {
         await userPreferences.save();
       } else {
         userPreferences.address = address;
-        userPreferences.updated_at = new Date();
         await userPreferences.save();
       }
 

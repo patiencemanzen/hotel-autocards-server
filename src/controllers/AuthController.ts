@@ -2,14 +2,14 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { User, IUserModel, Notification } from "../models";
+import { User, IUserModel } from "../models";
 import dotenv from "dotenv";
 import { validationResult } from "express-validator";
 import { tryCatch } from "../helpers/general-helpers";
 import { handleMongoError } from "../helpers/mongoose-healpers";
 import mongoose, { ObjectId } from "mongoose";
-// import { sendEmail } from "../services/NotificationService";
 import { generateAndStoreOTP } from "../utility/OTPUtil";
+import { sendDbNotification } from "../services/NotificationService";
 
 dotenv.config();
 
@@ -21,6 +21,7 @@ interface IUser extends IUserModel {
 }
 
 const authcode = process.env.AUTH_SECRET_KEY;
+const appName = process.env.APP_NAME;
 
 /**
  * Controller function for user signup
@@ -31,9 +32,8 @@ const authcode = process.env.AUTH_SECRET_KEY;
  * @param res - Express Response object
  */
 export const signup = async (req: Request, res: Response) => {
-  return tryCatch(
-    async () => {
-      const { firstname, lastname, email, password } = req.body;
+  return tryCatch(async () => {
+      const { fullname, email, telephone, password } = req.body;
       const errors = validationResult(req);
 
       if (!errors.isEmpty()) {
@@ -45,37 +45,25 @@ export const signup = async (req: Request, res: Response) => {
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
-      const user = new User({
-        firstname: firstname.trim().toLowerCase(),
-        lastname: lastname.trim().toLowerCase(),
-        email,
-        avatar: "",
-        remember_token: "",
-        verify_otp: "",
-        password: hashedPassword,
+      const user = await User.create({
+        fullname: fullname.trim().toLowerCase(),
+        telephone: telephone.trim().toLowerCase(),
+        email, password: hashedPassword,
       });
 
-      await user.save();
-
-      const token = jwt.sign(user, authcode);
+      const token = jwt.sign(user.toObject(), authcode);
       const otp = generateAndStoreOTP(user);
 
-      await Notification.create({
-        email: email,
-        phoneNumber: "",
-        subject: "Welcome to Citi-app!",
-        message: `🎉 Dear ${user.lastname},\n\nWelcome to Our citi-app! We're excited to have you on board. your OTP code ise ${otp}`,
-      });
-
-      // await sendEmail(notification);
+      sendDbNotification(email, telephone, 
+        `Welcome to ${appName}!`, `🎉 Dear ${user.fullname},\n\nWelcome to Our ${appName}! We're excited to have you on board. your OTP code ise ${otp}`
+      );
 
       res.status(201).send({
         status: "success",
         access_token: token,
         message: "User registered successfully",
       });
-    },
-    (error) => {
+    }, (error) => {
       const { status, error: errorMessage, details } = handleMongoError(error);
       res.status(status).json({ error: errorMessage, details });
     }
@@ -91,8 +79,7 @@ export const signup = async (req: Request, res: Response) => {
  * @param res - Express Response object
  */
 export const login = async (req: Request, res: Response) => {
-  return tryCatch(
-    async () => {
+  return tryCatch(async () => {
       const { email, password } = req.body;
       const errors = validationResult(req);
 
@@ -119,8 +106,7 @@ export const login = async (req: Request, res: Response) => {
         access_token: token,
         message: "User authenticated successfully",
       });
-    },
-    (error) => {
+    }, (error) => {
       if (error instanceof mongoose.Error) {
         const {
           status,
@@ -146,15 +132,14 @@ export const login = async (req: Request, res: Response) => {
  * @param res - Express Response object
  */
 export const googleOauthCallback = async (req: Request, res: Response) => {
-  return tryCatch(
-    async () => {
+  return tryCatch(async () => {
       const authUser = req.user;
       const user = await User.findOne({ email: (authUser as IUser).email });
 
       if (!user) {
         const user = new User({
-          firstname: (authUser as IUser).firstname.trim().toLowerCase(),
-          lastname: (authUser as IUser).lastname.trim().toLowerCase(),
+          fullname: (authUser as IUser).fullname.trim().toLowerCase(),
+          telephone: (authUser as IUser).telephone.trim().toLowerCase(),
           email: (authUser as IUser).email,
           avatar: "",
           remember_token: "",
@@ -172,8 +157,7 @@ export const googleOauthCallback = async (req: Request, res: Response) => {
         access_token: token,
         message: "User authenticated successfully",
       });
-    },
-    (error) => {
+    }, (error) => {
       return res.status(400).json({
         status: "error",
         error: error,
@@ -200,21 +184,13 @@ export const requestOTPCode = async (req: Request, res: Response) => {
 
       const otp = generateAndStoreOTP(user);
 
-      await Notification.create({
-        email: email,
-        phoneNumber: "",
-        subject: "Your One-Time Password (OTP) for citi-app Verification",
-        message: `Hello [User's Name], \n Thank you for using our service. Your One-Time Password (OTP) for account verification is: \n [${otp}] \n Please use this code within the next [5 min] minutes. If you did not request this code, please ignore this email.`,
-      });
-
-      // await sendEmail(notification);
-
+      sendDbNotification(email, "", `Your One-Time Password (OTP) for ${appName} Verification`, `Hello, \n Thank you for using our service. Your One-Time Password (OTP) for account verification is: \n [${otp}] \n Please use this code within the next [5 min] minutes. If you did not request this code, please ignore this email.`);
+     
       res.status(200).send({
         status: "success",
         message: "User OTP  Generated Successfully",
       });
-    },
-    (error) => {
+    }, (error) => {
       res.status(400).send({
         status: "error",
         message: "User OTP  Generated Successfully",
@@ -240,18 +216,17 @@ export const verifyOTPCode = async (req: Request, res: Response) => {
 
       if (!user) return res.status(404).json({ message: "User not found" });
 
-      if (user.verify_otp !== otp || user.otp_expires_at < new Date())
+      if (user.verifyOtp !== otp || user.otpExpiresAt < new Date())
         return res.status(400).json({ message: "Invalid or expired OTP" });
 
-      // Clear OTP-related fields and mark user as verified
-      user.verify_otp = null;
-      user.otp_expires_at = null;
+      user.verifyOtp = null;
+      user.otpExpiresAt = null;
       user.verified = true;
+
       await user.save();
 
       return res.status(200).json({ message: "OTP verified successfully" });
-    },
-    (error) => {
+    }, (error) => {
       return res
         .status(400)
         .json({ message: "Unable to verify you OTP", errors: error });
@@ -259,7 +234,6 @@ export const verifyOTPCode = async (req: Request, res: Response) => {
   );
 };
 
-// TODO think about the security of this process
 /**
  * Create and store newly user passwords and credentials
  *
