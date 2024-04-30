@@ -9,11 +9,11 @@ interface IOrganization extends Document {
 }
 
 const OrganizationSchema = new Schema<IOrganization>({
-    name: { type: String },
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true } as unknown,
-    description: { type: String },
-    deleted: { type: Boolean, default: false },
-    deletedAt: { type: Date },
+  name: { type: String },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true } as unknown,
+  description: { type: String },
+  deleted: { type: Boolean, default: false },
+  deletedAt: { type: Date },
 }, { timestamps: true });
 
 const Organization = mongoose.model<IOrganization>("Organizations", OrganizationSchema);

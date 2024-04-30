@@ -3,6 +3,7 @@ import { IUserPreferences, UserPreferences } from "./UserPreferences";
 import { Notification, INotification } from "./Notification";
 import { Organization, IOrganization } from "./Organization";
 import { IProject, Project } from "./Project";
+import { IDatabase, Database } from "./Database";
 
 export {
   User,
@@ -15,4 +16,6 @@ export {
   Organization,
   IProject,
   Project,
+  IDatabase,
+  Database,
 };
