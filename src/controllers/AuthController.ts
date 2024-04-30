@@ -10,6 +10,7 @@ import { handleMongoError } from "../helpers/mongoose-healpers";
 import mongoose, { ObjectId } from "mongoose";
 import { generateAndStoreOTP } from "../utility/OTPUtil";
 import { sendDbNotification } from "../services/NotificationService";
+import axios from "axios";
 
 dotenv.config();
 
@@ -134,24 +135,7 @@ export const login = async (req: Request, res: Response) => {
  */
 export const googleOauthCallback = async (req: Request, res: Response) => {
   return tryCatch(async () => {
-      const authUser = req.user;
-      const user = await User.findOne({ email: (authUser as IUser).email });
-
-      if (!user) {
-        const user = new User({
-          fullname: (authUser as IUser).fullname.trim().toLowerCase(),
-          telephone: (authUser as IUser).telephone.trim().toLowerCase(),
-          email: (authUser as IUser).email,
-          avatar: "",
-          remember_token: "",
-          password: "",
-        });
-
-        await user.save();
-      }
-
-      const userId: ObjectId = (user as IUser)._id;
-      const token = jwt.sign({ userId: userId }, authcode);
+      const token = jwt.sign({ userId: (req.user as IUser)._id }, authcode);
 
       res.status(200).send({
         status: "success",
@@ -162,11 +146,109 @@ export const googleOauthCallback = async (req: Request, res: Response) => {
       return res.status(400).json({
         status: "error",
         error: error,
-        message: error.message || "Unable to authenticate",
+        message: error.message || "Unable to authenticate with Google",
       });
     }
   );
 };
+
+/**
+ * Handle Google Auth callback User
+ * 
+ * @param profile 
+ * @param done 
+ * @returns 
+ */
+export const handleGoogleAuthUser = async (profile, done) => {
+  return tryCatch(async () => {
+    const user = await User.findOne({ email: profile.emails[0].value });
+
+    if (user) return done(null, user);
+
+    const newUser = await User.create({
+      fullname: profile.displayName,
+      email: profile.emails[0].value,
+      password: '',
+    });
+    
+    return done(null, newUser);
+  }, (error) => done(error, null));
+}
+
+/**
+ * Callback function for handling GitHub OAuth authentication.
+ *
+ * @param req - Express Request object
+ * @param res - Express Response object
+ */
+export const githubOauthCallback = async (req: Request, res: Response) => {
+  return tryCatch(async () => {
+      const requestToken = req.query.code
+      const clientID = process.env.GITHUB_CLIENT_ID;
+      const clientSecret = process.env.GITHUB_CLIENT_SECRET;
+
+      axios({
+        method: 'post',
+        url: `https://github.com/login/oauth/access_token?client_id=${clientID}&client_secret=${clientSecret}&code=${requestToken}`,
+        headers: { accept: 'application/json' }
+      }).then((response) => {
+        const authToken = handleGithubCallbackUser(response.data.access_token)
+
+        res.status(200).send({
+          status: authToken ? "success" : "error",
+          access_token: authToken,
+          message: authToken ? "User authenticated successfully" : "Unable to authenticate with Github",
+        });
+      });
+    }, (error) => {
+      return res.status(400).json({
+        status: "error",
+        error: error,
+        message: error.message || "Unable to authenticate with Github",
+      });
+    }
+  );
+}
+
+/**
+ * Callback function for handling GitHub OAuth authentication.
+ *
+ * @param req - Express Request object
+ * @param res - Express Response object
+ */
+const handleGithubCallbackUser = async (access_token: string) => {
+  axios({
+    method: 'get',
+    url: `https://api.github.com/user`,
+    headers: { Authorization: 'token ' + access_token }
+  }).then(async (response) => {
+    const authUser = response.data;
+
+    if(authUser && authUser.email) {
+      const user = await User.findOne({ email: authUser.email });
+
+      if (!user) {
+        await User.create({
+          fullname: authUser.name,
+          telephone: '',
+          email: authUser.email,
+          avatar: authUser.avatar,
+          remember_token: authUser.token,
+          password: "",
+        });
+      }
+
+      const userId: ObjectId = (user as IUser)._id;
+      const token = jwt.sign({ userId: userId }, authcode);
+
+      return token;
+    }
+
+    else {
+      return null;
+    }
+  })
+}
 
 /**
  * Request OTP code for a user
