@@ -48,13 +48,13 @@ export const show = async (req: Request, res: Response) => {
 export const store = async (req: Request, res: Response) => {
     return tryCatch(async () => {
       const errors = validationResult(req);
-      const { name } = req.body;
+      const { name, description } = req.body;
       const user = req.user as IUserModel;
 
       if (!errors.isEmpty())
         return res.status(422).json({ status: "error", errors: errors.array(), message: "Validation failed" });
 
-      const organization = await Organization.create({ name, user });
+      const organization = await Organization.create({ name, user, description });
 
       sendDbNotification(user.email, user.telephone, "Organization Created", `🎉 Dear ${user.fullname},\n\nYour organization ${organization.name} has been created successfully.`, user);
 
@@ -76,7 +76,7 @@ export const update = async (req: Request, res: Response) => {
     return tryCatch(async () => {
       const errors = validationResult(req);
 
-      const { name } = req.body;
+      const { name, description } = req.body;
       const user = req.user as IUserModel;
       const { id } = req.params;
 
@@ -88,6 +88,7 @@ export const update = async (req: Request, res: Response) => {
       if (!organization) return res.status(404).json({ status: "error", message: "Organization not found" });
 
       organization.name = name;
+      organization.description = description;
       await organization.save();
 
     }, (error) => res.status(400).json({ status: "error", error: error, message: error.message || "Unable to update organization" }));

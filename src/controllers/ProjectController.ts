@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { validationResult } from "express-validator";
 import { tryCatch } from "../helpers/general-helpers";
-import { Project } from "../models";
+import { IUserModel, Project } from "../models";
 import { Request, Response } from "express";
+import { sendDbNotification } from "../services/NotificationService";
 
 // Extend the Request interface
 interface RequestWithOrganization extends Request {
@@ -57,11 +58,13 @@ export const store = async (req: RequestWithOrganization, res: Response) => {
         const { name, description } = req.body;
 
         const organizationId = req.organization._id;
+        const user = req.user as IUserModel;
 
         if (!errors.isEmpty())
             return res.status(422).json({ status: "error", errors: errors.array(), message: "Validation failed" });
 
         const project = await Project.create({ name, description, organization: organizationId });
+        sendDbNotification(user.email, user.telephone, "Project Created", `🎉 Dear ${user.fullname},\n\nYour project ${project.name} has been created successfully.`, user);
 
         res.status(201).json({ status: "success", data: project, message: "Project created successfully" });
     }, (error) => res.status(400).json({ status: "error", error: error, message: error.message || "Unable to create Project" }));
@@ -76,14 +79,17 @@ export const store = async (req: RequestWithOrganization, res: Response) => {
 export const update = async (req: RequestWithOrganization, res: Response) => {
     return tryCatch(async () => {
         const errors = validationResult(req);
+
+        const { id } = req.params;
         const { name, description } = req.body;
         const organizationId = req.organization._id;
-        const { id } = req.params;
+        const user = req.user as IUserModel;
 
         if (!errors.isEmpty())
             return res.status(422).json({ status: "error", errors: errors.array(), message: "Validation failed" });
 
         const project = await Project.findOneAndUpdate({ _id: id, organization: organizationId }, { name, description }, { new: true });
+        sendDbNotification(user.email, user.telephone, "Project updated", `🎉 Dear ${user.fullname},\n\nYour project ${project.name} has been updated successfully.`, user);
 
         if (!project) return res.status(404).json({ status: "error", message: "Project not found" });
 
