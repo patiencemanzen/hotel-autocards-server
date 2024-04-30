@@ -10,11 +10,6 @@ import { handleMongoError } from "../helpers/mongoose-healpers";
 import mongoose, { ObjectId } from "mongoose";
 import { generateAndStoreOTP } from "../utility/OTPUtil";
 import { sendDbNotification } from "../services/NotificationService";
-import passport from 'passport';
-
-import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import { Strategy as GitHubStrategy } from 'passport-github';
-
 
 dotenv.config();
 
@@ -27,34 +22,6 @@ interface IUser extends IUserModel {
 
 const authcode = process.env.AUTH_SECRET_KEY;
 const appName = process.env.APP_NAME;
-
-const {
-  GOOGLE_AUTH_CLIENT_ID: GOOGLE_CLIENT_ID,
-  GOOGLE_AUTH_CLIENT_SECRET: GOOGLE_CLIENT_SECRET,
-  GOOGLE_AUTH_CALLBACK_URL: GOOGLE_CALLBACK_URL,
-
-  GITHUB_AUTH_CLIENT_ID: GITHUB_CLIENT_ID,
-  GITHUB_AUTH_CLIENT_SECRET: GITHUB_CLIENT_SECRET,
-  GITHUB_AUTH_REDIRECT_URL: GITHUB_REDIRECT_URL,
-} = process.env;
-
-/**
- * Configure Passport for OAuth
- * @returns void
- */
-export const passportForOAuth = () => {
-  passport.use(new GoogleStrategy({
-    clientID: GOOGLE_CLIENT_ID,
-    clientSecret: GOOGLE_CLIENT_SECRET,
-    callbackURL: GOOGLE_CALLBACK_URL
-  }, (_accessToken, _refreshToken, profile, done) => handleCallbackAuthUser(profile, done)));
-
-  passport.use(new GitHubStrategy({
-    clientID: GITHUB_CLIENT_ID,
-    clientSecret: GITHUB_CLIENT_SECRET,
-    callbackURL: GITHUB_REDIRECT_URL
-  }, async (_accessToken, _refreshToken, profile, done) => handleCallbackAuthUser(profile, done)));
-};
 
 /**
  * Controller function for user signup

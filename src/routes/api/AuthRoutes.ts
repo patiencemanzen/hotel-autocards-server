@@ -5,13 +5,14 @@ import { signupRequest, loginRequest } from '../../validators/AuthRequest';
 import { storeUserPreferencesRequest } from '../../validators/UserPreferenceRequest';
 import passport from 'passport';
 import dotenv from 'dotenv';
+import * as passportConfig from '../../config/passportOauth';
 
 dotenv.config();
 
 const router = express.Router();
 
 // Configure Passport for OAuth
-authController.passportForOAuth();
+passportConfig.oauthServices();
 
 /**
  * ----------------------------------------------

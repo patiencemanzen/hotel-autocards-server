@@ -14,7 +14,7 @@ import { sendDbNotification } from "../services/NotificationService";
 export const index = async (req: Request, res: Response) => {
     return tryCatch(async () => {
       const user = req.user as IUserModel;
-      const organizations = await Organization.find({ user: user._id });
+      const organizations = await Organization.find({ user: user._id, deleted: false });
 
       res.status(200).json({ status: "success", data: organizations, message: "Organizations fetched successfully" });
     }, (error) => res.status(400).json({ status: "error", error: error, message: error.message || "Unable to fetch organizations" }));
@@ -31,7 +31,7 @@ export const show = async (req: Request, res: Response) => {
       const user = req.user as IUserModel;
       const { id } = req.params;
 
-      const organization = await Organization.findOne({ _id: id, user: user._id });
+      const organization = await Organization.findOne({ _id: id, user: user._id, deleted: false });
 
       if (!organization) return res.status(404).json({ status: "error", message: "Organization not found" });
 
@@ -108,7 +108,9 @@ export const destroy = async (req: Request, res: Response) => {
 
       if (!organization) return res.status(404).json({ status: "error", message: "Organization not found" });
 
-      await organization.deleteOne();
+      organization.deleted = true;
+      organization.deletedAt = new Date();
+      await organization.save();
 
       res.status(200).json({ status: "success", message: "Organization deleted successfully" });
     }, (error) => res.status(400).json({ status: "error", error: error, message: error.message || "Unable to delete organization" }));
