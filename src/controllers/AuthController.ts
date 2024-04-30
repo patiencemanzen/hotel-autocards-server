@@ -10,7 +10,11 @@ import { handleMongoError } from "../helpers/mongoose-healpers";
 import mongoose, { ObjectId } from "mongoose";
 import { generateAndStoreOTP } from "../utility/OTPUtil";
 import { sendDbNotification } from "../services/NotificationService";
-import axios from "axios";
+import passport from 'passport';
+
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import { Strategy as GitHubStrategy } from 'passport-github';
+
 
 dotenv.config();
 
@@ -23,6 +27,34 @@ interface IUser extends IUserModel {
 
 const authcode = process.env.AUTH_SECRET_KEY;
 const appName = process.env.APP_NAME;
+
+const {
+  GOOGLE_AUTH_CLIENT_ID: GOOGLE_CLIENT_ID,
+  GOOGLE_AUTH_CLIENT_SECRET: GOOGLE_CLIENT_SECRET,
+  GOOGLE_AUTH_CALLBACK_URL: GOOGLE_CALLBACK_URL,
+
+  GITHUB_AUTH_CLIENT_ID: GITHUB_CLIENT_ID,
+  GITHUB_AUTH_CLIENT_SECRET: GITHUB_CLIENT_SECRET,
+  GITHUB_AUTH_REDIRECT_URL: GITHUB_REDIRECT_URL,
+} = process.env;
+
+/**
+ * Configure Passport for OAuth
+ * @returns void
+ */
+export const passportForOAuth = () => {
+  passport.use(new GoogleStrategy({
+    clientID: GOOGLE_CLIENT_ID,
+    clientSecret: GOOGLE_CLIENT_SECRET,
+    callbackURL: GOOGLE_CALLBACK_URL
+  }, (_accessToken, _refreshToken, profile, done) => handleCallbackAuthUser(profile, done)));
+
+  passport.use(new GitHubStrategy({
+    clientID: GITHUB_CLIENT_ID,
+    clientSecret: GITHUB_CLIENT_SECRET,
+    callbackURL: GITHUB_REDIRECT_URL
+  }, async (_accessToken, _refreshToken, profile, done) => handleCallbackAuthUser(profile, done)));
+};
 
 /**
  * Controller function for user signup
@@ -153,13 +185,38 @@ export const googleOauthCallback = async (req: Request, res: Response) => {
 };
 
 /**
+ * Callback function for handling GitHub OAuth authentication.
+ *
+ * @param req - Express Request object
+ * @param res - Express Response object
+ */
+export const githubOauthCallback = async (req: Request, res: Response) => {
+  return tryCatch(async () => {
+      const token = jwt.sign({ userId: (req.user as IUser)._id }, authcode);
+
+      res.status(200).send({
+        status: "success",
+        access_token: token,
+        message: "User authenticated successfully",
+      });
+    }, (error) => {
+      return res.status(400).json({
+        status: "error",
+        error: error,
+        message: error.message || "Unable to authenticate with Github",
+      });
+    }
+  );
+};
+
+/**
  * Handle Google Auth callback User
  * 
  * @param profile 
  * @param done 
  * @returns 
  */
-export const handleGoogleAuthUser = async (profile, done) => {
+export const handleCallbackAuthUser = async (profile, done) => {
   return tryCatch(async () => {
     const user = await User.findOne({ email: profile.emails[0].value });
 
@@ -173,82 +230,7 @@ export const handleGoogleAuthUser = async (profile, done) => {
     
     return done(null, newUser);
   }, (error) => done(error, null));
-}
-
-/**
- * Callback function for handling GitHub OAuth authentication.
- *
- * @param req - Express Request object
- * @param res - Express Response object
- */
-export const githubOauthCallback = async (req: Request, res: Response) => {
-  return tryCatch(async () => {
-      const requestToken = req.query.code
-      const clientID = process.env.GITHUB_CLIENT_ID;
-      const clientSecret = process.env.GITHUB_CLIENT_SECRET;
-
-      axios({
-        method: 'post',
-        url: `https://github.com/login/oauth/access_token?client_id=${clientID}&client_secret=${clientSecret}&code=${requestToken}`,
-        headers: { accept: 'application/json' }
-      }).then((response) => {
-        const authToken = handleGithubCallbackUser(response.data.access_token)
-
-        res.status(200).send({
-          status: authToken ? "success" : "error",
-          access_token: authToken,
-          message: authToken ? "User authenticated successfully" : "Unable to authenticate with Github",
-        });
-      });
-    }, (error) => {
-      return res.status(400).json({
-        status: "error",
-        error: error,
-        message: error.message || "Unable to authenticate with Github",
-      });
-    }
-  );
-}
-
-/**
- * Callback function for handling GitHub OAuth authentication.
- *
- * @param req - Express Request object
- * @param res - Express Response object
- */
-const handleGithubCallbackUser = async (access_token: string) => {
-  axios({
-    method: 'get',
-    url: `https://api.github.com/user`,
-    headers: { Authorization: 'token ' + access_token }
-  }).then(async (response) => {
-    const authUser = response.data;
-
-    if(authUser && authUser.email) {
-      const user = await User.findOne({ email: authUser.email });
-
-      if (!user) {
-        await User.create({
-          fullname: authUser.name,
-          telephone: '',
-          email: authUser.email,
-          avatar: authUser.avatar,
-          remember_token: authUser.token,
-          password: "",
-        });
-      }
-
-      const userId: ObjectId = (user as IUser)._id;
-      const token = jwt.sign({ userId: userId }, authcode);
-
-      return token;
-    }
-
-    else {
-      return null;
-    }
-  })
-}
+};
 
 /**
  * Request OTP code for a user
