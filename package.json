@@ -2,6 +2,7 @@
   "name": "schema-sentry",
   "version": "1.0.0",
   "description": "schema sentry backend",
+  "type": "module",
   "engines": {
     "node": "20.x",
     "npm": "10.x"
