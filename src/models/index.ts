@@ -6,6 +6,7 @@ import { IProject, Project } from "./Project";
 import { IDatabase, Database } from "./Database";
 import { ITable, Table } from "./Table";
 import { ITableColumn, TableColumn } from "./TableColumn";
+import { ITableRelationship, TableRelationship } from "./TableRelationship";
 
 export {
   User,
@@ -24,4 +25,6 @@ export {
   Table,
   ITableColumn,
   TableColumn,
+  ITableRelationship,
+  TableRelationship,
 };

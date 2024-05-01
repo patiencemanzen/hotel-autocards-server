@@ -1,6 +1,7 @@
 import express from 'express';
 import * as TableController from '../../controllers/TableController';
 import * as TableColumnController from '../../controllers/TableColumnController';
+import * as TableRelationshipController from '../../controllers/TableRelationshipController';
 import * as TableRequest from '../../validators/TableRequest';
 
 const router = express.Router();
@@ -26,5 +27,14 @@ router.get('/:table_id/columns/:id', TableRequest.createTableColumns, TableColum
 router.post('/:table_id/columns', TableRequest.createTableColumns, TableColumnController.store);
 router.put('/:table_id/columns', TableRequest.updateTableColumns, TableColumnController.update);
 router.delete('/:table_id/columns', TableRequest.deleteTableColumns, TableColumnController.destroy);
+
+/**
+ * ----------------------------------------------
+ * TABLES RELATIONSHIP ROUTES
+ * ----------------------------------------------
+ */
+router.post('/relationships', TableRequest.createTableRelation, TableRelationshipController.store);
+router.put('/relationships/:relation_id', TableRequest.updateTableRelation, TableRelationshipController.update);
+router.delete('/relationships/:relation_id', TableRelationshipController.destroy);
 
 export default router;
