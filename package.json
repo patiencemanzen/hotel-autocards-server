@@ -15,7 +15,7 @@
     "prettier": "prettier --config .prettierrc --write .",
     "test:watch": "jest --watch"
   },
-  "author": "schema-sentry",
+  "author": "manirabona patience",
   "license": "ISC",
   "devDependencies": {
     "@types/jest": "~29.5",
