@@ -129,7 +129,7 @@ export const destroy = async (req: RequestWithModel, res: Response) => {
 
         sendDbNotification(user.email, user.telephone, `Database ${database.name} deleted successfully`, `Database ${database.name} has been deleted successfully in project ${project.name}`, user);
 
-        res.status(200).json({ status: "success", data: database, message: "Database deleted successfully" });
+        res.status(200).json({ status: "success", message: "Database deleted successfully" });
     }, (error) => res.status(400).json({ status: "error", error: error, message: error.message || "Unable to delete Database" }));
 }
 
