@@ -7,6 +7,7 @@ import { IDatabase, Database } from "./Database";
 import { ITable, Table } from "./Table";
 import { ITableColumn, TableColumn } from "./TableColumn";
 import { ITableRelationship, TableRelationship } from "./TableRelationship";
+import { ITableDatatype, TableDatatype } from "./TableDatatype";
 
 export {
   User,
@@ -27,4 +28,6 @@ export {
   TableColumn,
   ITableRelationship,
   TableRelationship,
+  ITableDatatype,
+  TableDatatype,
 };
