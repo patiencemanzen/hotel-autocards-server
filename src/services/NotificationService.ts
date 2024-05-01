@@ -14,7 +14,7 @@ dotenv.config();
  * @param message 
  * @returns 
  */
-export const sendEmailNotifation = async (email: any, subject: any, message: any) => {
+export const sendEmailNotifation = async (email: string, subject: string, message: string) => {
   return tryCatch(async () => {
       if (process.env.APP_ENV == "production" || process.env.APP_ENV == "testing") {
         const mailgun = Mailgun({ apiKey: 'your-mailgun-api-key', domain: 'your-mailgun-domain' });
@@ -47,7 +47,7 @@ export const sendEmailNotifation = async (email: any, subject: any, message: any
  * @param message 
  * @returns 
  */
-export const sendDbNotification = async (email: any, telephone: any, subject: any, message: any, user: IUserModel) => {
+export const sendDbNotification = async (email: string, telephone: string, subject: string, message: string, user: IUserModel) => {
   await Notification.create({
     email: email,
     phoneNumber: telephone,

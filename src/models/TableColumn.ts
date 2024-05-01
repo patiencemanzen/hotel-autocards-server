@@ -12,7 +12,7 @@ interface ITableColumn extends Document {
     unique?: boolean;
     notNull?: boolean;
     check?: string;
-    defaultValue?: any;
+    defaultValue?: string;
     autoIncrement?: boolean;
   };
   collation?: string;
