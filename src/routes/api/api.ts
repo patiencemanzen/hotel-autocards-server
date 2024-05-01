@@ -4,15 +4,17 @@ import authRoutes from './AuthRoutes';
 import OrganizationsRoutes from './OrganizationsRoutes';
 import ProjectsRoutes from './ProjectsRoutes';
 import DatabasesRoutes from './DatabasesRoutes';
+import TablesRoutes from './TablesRoutes';
 
 import { authMiddleware } from '../../middlewares/AuthMiddleware';
-import { checkOrganizationOwnership, checkProjectOwnership } from '../../middlewares/CheckModelOwnership';
+import { bindDatabaseModels, bindOrganizationModels, bindProjectModels } from '../../middlewares/CheckModelOwnership';
 
 const router = express.Router();
 
 router.use(`/auth`, authRoutes);
 router.use(`/organizations`, authMiddleware, OrganizationsRoutes);
-router.use(`/projects/:organization`, authMiddleware, checkOrganizationOwnership, ProjectsRoutes);
-router.use(`/databases/:project`, authMiddleware, checkProjectOwnership, DatabasesRoutes);
+router.use(`/projects/:organization`, authMiddleware, bindOrganizationModels, ProjectsRoutes);
+router.use(`/databases/:project`, authMiddleware, bindProjectModels, DatabasesRoutes);
+router.use(`/tables/:database`, authMiddleware, bindDatabaseModels, TablesRoutes);
 
 export default router;

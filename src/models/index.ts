@@ -4,6 +4,8 @@ import { Notification, INotification } from "./Notification";
 import { Organization, IOrganization } from "./Organization";
 import { IProject, Project } from "./Project";
 import { IDatabase, Database } from "./Database";
+import { ITable, Table } from "./Table";
+import { ITableColumn, TableColumn } from "./TableColumn";
 
 export {
   User,
@@ -18,4 +20,8 @@ export {
   Project,
   IDatabase,
   Database,
+  ITable,
+  Table,
+  ITableColumn,
+  TableColumn,
 };
