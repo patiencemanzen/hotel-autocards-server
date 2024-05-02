@@ -16,7 +16,7 @@ RUN npm install
 # Compile TypeScript to JavaScript
 RUN npm run build
 
-# Make port 3000 available to the world outside this container
+# Make port 4000 available to the world outside this container
 EXPOSE 4000
 
 # Run the compiled JS when the container launches
