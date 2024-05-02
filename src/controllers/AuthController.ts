@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { Request, Response } from "express";
-import bcrypt from "bcrypt";
+import * as bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { User, IUserModel } from "../models";
 import dotenv from "dotenv";

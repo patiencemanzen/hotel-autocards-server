@@ -20,4 +20,4 @@ RUN npm run build
 EXPOSE 4000
 
 # Run the compiled JS when the container launches
-CMD ["node", "build/index.js"]
+CMD ["node", "build/src/index.js"]
