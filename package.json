@@ -8,6 +8,7 @@
   },
   "main": "index.js",
   "scripts": {
+    "prestart": "tsc",
     "start": "nodemon src/index.ts",
     "clean": "rimraf coverage build tmp",
     "prebuild": "npm run lint",
