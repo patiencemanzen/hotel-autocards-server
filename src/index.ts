@@ -10,7 +10,7 @@ import routes from "./routes/index";
 dotenv.config();
 
 const app = express();
-const app_port = process.env.APP_URL_PORT;
+const port = process.env.PORT || 4000;
 
 app.use(session({ secret: process.env.AUTH_SECRET_KEY, resave: true, saveUninitialized: true }));
 app.use(passport.initialize());
@@ -24,4 +24,4 @@ passport.deserializeUser((obj, cb) => cb(null, obj));
 
 createDatabase(new MongoDBConnection(), (error: never) => console.log(`Unable to connect to database - ${error}`));
 
-app.listen(app_port, () => console.log(`App is listening to port: ${app_port}`));
+app.listen(port, () => console.log(`App is listening to port: ${port}`));
