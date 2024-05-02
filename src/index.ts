@@ -17,6 +17,9 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.get('/', (_req, res) => res.send('Welcome to schema-sentry api gateway!'));  
+
 app.use(routes);
 
 passport.serializeUser((user, cb) => cb(null, user));
@@ -24,4 +27,4 @@ passport.deserializeUser((obj, cb) => cb(null, obj));
 
 createDatabase(new MongoDBConnection(), (error: never) => console.log(`Unable to connect to database - ${error}`));
 
-app.listen(port, () => console.log(`App is listening to port: ${port}`));
+app.listen(port, () => console.log(`App is listening to port: ${port}`, port));
