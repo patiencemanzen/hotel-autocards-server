@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from "mongoose";
+import { versioningPlugin } from "../modules/VersioningModule";
 
 interface ITableRelationship extends Document {
     referenced_table: string;
@@ -31,6 +32,8 @@ const TableRelationshipSchema = new Schema<ITableRelationship>({
     relationship_type: { type: String, required: true },
     cardinality: { type: String, required: true },
 }, { timestamps: true });
+
+TableRelationshipSchema.plugin(versioningPlugin);
 
 const TableRelationship = mongoose.model<ITableRelationship>("table_relationships", TableRelationshipSchema);
 

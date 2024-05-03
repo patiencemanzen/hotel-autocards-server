@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from "mongoose";
+import { versioningPlugin } from "../modules/VersioningModule";
 
 interface ITableColumn extends Document {
   name: string;
@@ -47,6 +48,8 @@ const TableColumnSchema = new Schema<ITableColumn>({
   deleted: { type: Boolean, default: false },
   deletedAt: { type: Date },
 }, { timestamps: true });
+
+TableColumnSchema.plugin(versioningPlugin);
 
 const TableColumn = mongoose.model<ITableColumn>("table_columns", TableColumnSchema);
 

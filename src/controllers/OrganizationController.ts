@@ -14,9 +14,15 @@ import { sendDbNotification } from "../services/NotificationService";
 export const index = async (req: Request, res: Response) => {
     return tryCatch(async () => {
       const user = req.user as IUserModel;
-      const organizations = await Organization.find({ user: user._id, deleted: false });
 
-      res.status(200).json({ status: "success", data: organizations, message: "Organizations fetched successfully" });
+      const { query, order = { createdAt: 'desc' }, page = 1, limit = 10 } = req.query;
+      const filters: any = { user: user._id, deleted: false };
+      if (query) filters.name = new RegExp(query as string, 'i');
+
+      const organizations = await Organization.find(filters).sort(order as { [key: string]: 'asc' | 'desc' }).limit(Number(limit) * 1).skip((Number(page) - 1) * Number(limit)).exec();
+      const count = await Organization.countDocuments(filters);
+
+      res.status(200).json({ status: "success", data: organizations, message: "Organizations fetched successfully", total_pages: Math.ceil(count / Number(limit)), current_page: Number(page) });
     }, (error) => res.status(400).json({ status: "error", error: error, message: error.message || "Unable to fetch organizations" }));
 }
 
@@ -91,6 +97,7 @@ export const update = async (req: Request, res: Response) => {
       organization.description = description;
       await organization.save();
 
+      res.status(200).json({ status: "success", data: organization, message: "Organization updated successfully" });
     }, (error) => res.status(400).json({ status: "error", error: error, message: error.message || "Unable to update organization" }));
 }
 

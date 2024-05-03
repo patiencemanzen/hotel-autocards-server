@@ -21,9 +21,15 @@ interface RequestWithModel extends Request {
  */
 export const index = async (req: RequestWithModel, res: Response) => {
     return tryCatch(async () => {
-        const table = await Table.find({ database: req.database._id, deleted: false });
+        const { query, order = { createdAt: 'desc' }, page = 1, limit = 10 } = req.query;
 
-        res.status(200).json({ status: "success", data: table, message: "Tables fetched successfully" });
+        const filters: any = { database: req.database._id, deleted: false };
+        if (query) filters.name = new RegExp(query as string, 'i');
+
+        const table = await Table.find(filters).sort(order as { [key: string]: 'asc' | 'desc' }).limit(Number(limit) * 1).skip((Number(page) - 1) * Number(limit)).exec();
+        const count = await Table.countDocuments(filters);
+
+        res.status(200).json({ status: "success", data: table, message: "Tables fetched successfully", total_pages: Math.ceil(count / Number(limit)), current_page: Number(page) });
     }, (error) => res.status(400).json({ status: "error", error: error, message: error.message || "Unable to fetch tables" }));
 }
 

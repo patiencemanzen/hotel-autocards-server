@@ -24,9 +24,15 @@ interface RequestWithModel extends Request {
 export const index = async (req: RequestWithModel, res: Response) => {
     return tryCatch(async () => {
         const project = req.project as IProject;
-        const databases = await Database.find({ project: project._id, deleted: false });
+        const { query, order = { createdAt: 'desc' }, page = 1, limit = 10 } = req.query;
 
-        res.status(200).json({ status: "success", data: databases, message: "Databases fetched successfully" });
+        const filters: any = { project: project._id, deleted: false };
+        if (query) filters.name = new RegExp(query as string, 'i');
+        
+        const databases = await Database.find(filters).sort(order as { [key: string]: 'asc' | 'desc' }).limit(Number(limit) * 1).skip((Number(page) - 1) * Number(limit)).exec();
+        const count = await Database.countDocuments(filters);
+
+        res.status(200).json({ status: "success", data: databases, message: "Databases fetched successfully", total_pages: Math.ceil(count / Number(limit)), current_page: Number(page) });
     }, (error) => res.status(400).json({ status: "error", error: error, message: error.message || "Unable to fetch Databases" }));
 }
 

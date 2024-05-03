@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from "mongoose";
+import { versioningPlugin } from "../modules/VersioningModule";
 
 interface IOrganization extends Document {
   name?: string;
@@ -15,6 +16,8 @@ const OrganizationSchema = new Schema<IOrganization>({
   deleted: { type: Boolean, default: false },
   deletedAt: { type: Date },
 }, { timestamps: true });
+
+OrganizationSchema.plugin(versioningPlugin);
 
 const Organization = mongoose.model<IOrganization>("Organizations", OrganizationSchema);
 

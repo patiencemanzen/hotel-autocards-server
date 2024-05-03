@@ -8,6 +8,7 @@ import { ITable, Table } from "./Table";
 import { ITableColumn, TableColumn } from "./TableColumn";
 import { ITableRelationship, TableRelationship } from "./TableRelationship";
 import { ITableDatatype, TableDatatype } from "./TableDatatype";
+import { IModelHistory, ModelHistory } from "./ModelHistory";
 
 export {
   User,
@@ -30,4 +31,6 @@ export {
   TableRelationship,
   ITableDatatype,
   TableDatatype,
+  ModelHistory,
+  IModelHistory,
 };

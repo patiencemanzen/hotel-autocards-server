@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from "mongoose";
+import { versioningPlugin } from "../modules/VersioningModule";
 
 interface IDatabase extends Document {
   name?: string;
@@ -15,6 +16,8 @@ const DatabaseSchema = new Schema<IDatabase>({
     deleted: { type: Boolean, default: false },
     deletedAt: { type: Date },
 }, { timestamps: true });
+
+DatabaseSchema.plugin(versioningPlugin);
 
 const Database = mongoose.model<IDatabase>("Databases", DatabaseSchema);
 
