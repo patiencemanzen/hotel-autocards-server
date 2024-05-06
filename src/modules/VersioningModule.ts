@@ -13,7 +13,7 @@ export const versioningPlugin = (schema, _options) => {
         next();
     });
   
-    schema.post(['save', 'update', 'findOneAndUpdate'], async (doc) => {
+    schema.post(['save', 'update', 'findOneAndUpdate'], async (doc) => { 
         const historyDoc = new ModelHistory({
             originalId: {
                 id: doc._id,

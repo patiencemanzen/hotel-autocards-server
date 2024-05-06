@@ -6,6 +6,7 @@ import ProjectsRoutes from './ProjectsRoutes';
 import DatabasesRoutes from './DatabasesRoutes';
 import TablesRoutes from './TablesRoutes';
 import DatatypesRoutes from './DatatypesRoutes';
+import ModelHistoryRoutes from './ModelHistoryRoutes';
 
 import { authMiddleware } from '../../middlewares/AuthMiddleware';
 import { bindDatabaseModels, bindOrganizationModels, bindProjectModels } from '../../middlewares/CheckModelOwnership';
@@ -18,5 +19,6 @@ router.use(`/projects/:organization`, authMiddleware, bindOrganizationModels, Pr
 router.use(`/databases/:project`, authMiddleware, bindProjectModels, DatabasesRoutes);
 router.use(`/tables/:database`, authMiddleware, bindDatabaseModels, TablesRoutes);
 router.use(`/datatypes`, authMiddleware, DatatypesRoutes);
+router.use(`/history`, authMiddleware, ModelHistoryRoutes)
 
 export default router;

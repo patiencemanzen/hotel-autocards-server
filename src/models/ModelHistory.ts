@@ -8,6 +8,7 @@ interface IModelHistory extends Document {
     onModel: string;
     deleted?: boolean;
     deletedAt?: Date;
+    createdAt: Date;
 }
 
 const ModelHistorySchema = new Schema<IModelHistory>({
