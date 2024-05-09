@@ -26,7 +26,7 @@ export const merge = async (req: Request, res: Response) => {
             const filename = structure.filename;
             const tech_stack = structure.tech_stack;
 
-            const table = (tableId && tableId.trim() !== '')
+            const table = (tableId && tableId.trim() !== '' && tableId !== 'null')
                     ? await Table.findOne({ _id: tableId, deleted: false })
                     : await Table.create({ name: tableName, database: database._id, description: "", filename, tech_stack});
 
