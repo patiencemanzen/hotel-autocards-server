@@ -18,7 +18,7 @@ app.use(passport.session());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get('/', (_req, res) => res.send('Welcome to schema-sentry api gateway!'));  
+app.get('/', (_req, res) => res.send('Welcome to parronaut-server api gateway!'));  
 
 app.use(routes);
 

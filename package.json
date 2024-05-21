@@ -1,5 +1,5 @@
 {
-  "name": "schema-sentry",
+  "name": "parronaut-server",
   "version": "1.0.0",
   "description": "schema sentry backend",
   "engines": {
