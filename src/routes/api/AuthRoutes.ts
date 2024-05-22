@@ -1,6 +1,6 @@
 import express from 'express';
 import * as authController from '../../controllers/AuthController';
-import { signupRequest, loginRequest } from '../../validators/AuthRequest';
+import { signupRequest, loginRequest, loginDriverRequest } from '../../validators/AuthRequest';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -17,6 +17,13 @@ router.post('/signin', loginRequest, authController.login);
 router.post('/request/otp', loginRequest, authController.requestOTPCode);
 router.post('/verify/otp', loginRequest, authController.verifyOTPCode);
 router.post('/new-password', loginRequest, authController.newCredentials);
+
+/**
+ * ----------------------------------------------
+ * DRIVER AUTH ROUTES
+ * ----------------------------------------------
+ */
+router.post('/driver/signin', loginDriverRequest, authController.driverSignin);
 
 /**
  * ----------------------------------------------

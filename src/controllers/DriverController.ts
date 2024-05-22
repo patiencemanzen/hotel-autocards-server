@@ -18,8 +18,9 @@ export const store = async (req: Request, res: Response) => {
             return res.status(422).json({ status: "error", errors: errors.array(), message: "Validation failed" });
 
         const { name, description, lisence } = req.body;
-
-        const driver = await Drivers.create({ name, description, lisence });
+        const username = name.toLowerCase().replace(/\s/g, '');
+        const pin_number = Math.floor(100000 + Math.random() * 900000);
+        const driver = await Drivers.create({ name, description, lisence, pin_number, username });
 
         res.status(201).json({ status: "success", data: driver, message: "Driver created successfully" });
     }, (error) => res.status(400).json({ status: "error", error: error, message: error.message || "Unable to create Driver" }));

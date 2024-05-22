@@ -2,7 +2,7 @@
 import { Request, Response } from "express";
 import * as bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { User, IUserModel } from "../models";
+import { User, IUserModel, Drivers, IDrivers } from "../models";
 import dotenv from "dotenv";
 import { validationResult } from "express-validator";
 import { tryCatch } from "../helpers/general-helpers";
@@ -267,3 +267,47 @@ export const newCredentials = async (req: Request, res: Response) => {
     }
   );
 };
+
+/**
+ * Controller function for driver signin
+ *
+ * Use tryCatch helper to handle async operations and errors
+ *
+ * @param req - Express Request object
+ * @param res - Express Response object
+ */
+export const driverSignin = async (req: Request, res: Response) => {
+  return tryCatch(async () => {
+    const { username, pin_number } = req.body;
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(422).json({
+        status: "error",
+        errors: errors.array(),
+        message: "Validation failed",
+      });
+    }
+
+    const driver = await Drivers.findOne({ pin_number, username });
+
+    if (!driver) return res.status(401).send({ status: "error", message: "Invalid Username or pin" });
+
+    const driverId: ObjectId = (driver as IDrivers)._id;
+    const token = jwt.sign({ driverId: driverId }, authcode);
+
+    res.status(201).send({
+      status: "success",
+      driver: driver,
+      access_token: token,
+      message: "Driver authenticated successfully",
+    });
+  }, (error) => {
+    return res.status(400).json({
+      status: "error",
+      error: error,
+      message: error.message || "Unable to authenticate driver",
+    });
+  });
+}
+      

@@ -11,3 +11,8 @@ export const loginRequest = [
   body('email').isEmail().withMessage('Invalid email address'),
   body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long'),
 ];
+
+export const loginDriverRequest = [
+  body('username').trim().notEmpty().withMessage('Invalid username'),
+  body('pin_number').isNumeric().withMessage('Invalid pin number'),
+];
