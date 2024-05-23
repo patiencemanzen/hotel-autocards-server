@@ -40,13 +40,36 @@ const io = new Server(server, {
   }
 });
 
+let buses = [];
+let passengers = {};
+
 io.on('connection', (socket) => {
   socket.on('new-coordinates', (data) => {
     updateDatabaseWithCoordinates(data);
-    io.emit('driver-coordinates', data);
+
+    let bus = buses.find(bus => bus.route === data.route);
+
+    if (bus) {
+      bus.bus_from = data.bus_from;
+      bus.bus_to = data.bus_to;
+    } else {
+      buses.push(data);
+    }
+
+    socket.join(data.route);
+    io.to(data.route).emit('buses-coordinates', buses);
+  });
+
+  socket.on('join-route', (route) => {
+    if (passengers[socket.id])
+      socket.leave(passengers[socket.id]);
+
+    socket.join(route);
+
+    passengers[socket.id] = route;
   });
 });
 
-io.on('disconnect', () => {
-  console.log('User disconnected');
+io.on('disconnect', (socket) => {
+  delete passengers[socket.id];
 });
