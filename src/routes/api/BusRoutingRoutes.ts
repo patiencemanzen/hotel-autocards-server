@@ -9,5 +9,6 @@ const router = express.Router();
  * ----------------------------------------------
  */
 router.post('/init', BusRoutingController.init);
+router.get('/in-routings', BusRoutingController.getInRoutings);
 
 export default router;

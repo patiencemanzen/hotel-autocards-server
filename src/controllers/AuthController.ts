@@ -10,6 +10,7 @@ import { handleMongoError } from "../helpers/mongoose-healpers";
 import mongoose, { ObjectId } from "mongoose";
 import { generateAndStoreOTP } from "../utility/OTPUtil";
 import { sendDbNotification } from "../services/NotificationService";
+import { Passenger } from "../models/index";
 
 dotenv.config();
 
@@ -50,6 +51,8 @@ export const signup = async (req: Request, res: Response) => {
         telephone: telephone.trim().toLowerCase(),
         email, password: hashedPassword,
       });
+
+      await Passenger.create({ user: user._id });
 
       const token = jwt.sign(user.toObject(), authcode);
       const otp = generateAndStoreOTP(user);
@@ -151,6 +154,7 @@ export const handleOauthCallback = async (req: Request, res: Response) => {
       else {
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = await User.create({ fullname, email, password: hashedPassword, avatar });
+        await Passenger.create({ user: newUser._id });
         const token = jwt.sign(newUser.toObject(), authcode);
 
         res.status(201).send({

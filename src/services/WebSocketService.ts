@@ -1,21 +1,24 @@
 import { Server } from 'socket.io';
 import { updateDatabaseWithCoordinates } from '../controllers/WebSocketController';
+import { BusRouting, BusRoutingPassengers, IBuses } from '../models';
+import { formatBusRouting } from '../routes/api/resources/BusRoutingResource';
 
 interface Bus {
-  route: string;
+  id: string;
   bus_from: { lat: number; lng: number };
   bus_to: { lat: number; lng: number };
   roomId: string;
 }
 
-interface CoordinateData extends Bus {
-  coordinates: { lat: number; lng: number };
+interface IBusInRouting {
+    bus: IBuses;
+    createdAt: Date;
+    format(): any;
 }
 
 export class SocketHandler {
     private socket;
     private io: Server;
-    private busesWithRoomIds: Bus[] = [];
 
     constructor(socket, io: Server) {
         this.socket = socket;
@@ -26,24 +29,28 @@ export class SocketHandler {
      * Handle new coordinates
      * @param buses 
      */
-    handleNewCoordinates(buses: Bus[]) {
-        this.socket.on('new-coordinates', (data: CoordinateData) => {
+    handleNewCoordinates(buses: any) {
+        this.socket.on('new-coordinates', async (data: any) => {
             try {
-                updateDatabaseWithCoordinates(data);
-
-                let bus = buses.find(bus => bus.route === data.route);
+                await updateDatabaseWithCoordinates(data);                
                 
-                if (bus) {
-                    bus.bus_from = data.bus_from;
-                    bus.bus_to = data.bus_to;
-                } else {
-                    const newBus = { ...data, roomId: data.route };
-                    buses.push(newBus);
-                    this.busesWithRoomIds.push(newBus);
-                }
+                const startOfToday = new Date();
+                startOfToday.setHours(0, 0, 0, 0);
+
+                const endOfToday = new Date(startOfToday);
+                endOfToday.setDate(endOfToday.getDate() + 1);
+
+                let busRoutings: IBusInRouting[] = await BusRouting.find({ createdAt: { $gte: startOfToday, $lt: endOfToday }});
+                busRoutings = busRoutings.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+                const uniqueBusRoutings = busRoutings.filter((busRouting: IBusInRouting, index: number, self: IBusInRouting[]) =>
+                    index === self.findIndex((t: IBusInRouting) => (
+                        t.bus.toString() === busRouting.bus.toString()
+                    ))
+                ).map((busRouting: IBusInRouting) => formatBusRouting(busRouting));
 
                 this.socket.join(data.route);
-                this.io.emit('public-routing-buses', this.busesWithRoomIds);
+                this.io.emit('public-routing-buses', uniqueBusRoutings);
                 this.io.to(data.route).emit('ongoing-buse-coordinates', buses);
             } catch (error) {
                 console.error('Error handling new coordinates:', error);
@@ -51,11 +58,16 @@ export class SocketHandler {
         });
     }
 
+    /**
+     * Handle want to go request
+     * @param data
+     */
     handleWantToGoRequest() {
-        this.socket.on('want-to-go', (data: { bus: Bus, user: any }) => {
+        this.socket.on('want-to-go', async (data: { route: any, bus: Bus, user: any }) => {
             try {
-                this.socket.join(data.bus.route);
-                this.io.to(data.bus.route).emit(`new-passenger-for-driver-with-${data.bus.route}`, data.user);
+                await BusRoutingPassengers.create({ busRouting: data.route, passenger: data.user._id });
+                this.socket.join(data.route);
+                this.io.to(data.route).emit(`new-passenger-for-driver-with-${data.route}`, data.user);
             } catch (error) {
                 console.error('Error handling want to go request:', error);
             }

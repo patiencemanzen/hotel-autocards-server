@@ -1,17 +1,14 @@
-import { tryCatch } from "../helpers/general-helpers";
 import { BusRouting } from "../models";
+import { formatBusRouting } from "../routes/api/resources/BusRoutingResource";
 
-export const updateDatabaseWithCoordinates = (data) => {
-    return tryCatch(async () => {
-        const { route, cordinates, bus_from, bus_to } = data;
-        const routing = await BusRouting.findOne({ _id: route });
+export const updateDatabaseWithCoordinates = async (data: any) => {
+    const { route, coordinates } = data;
+    const routing = await BusRouting.findOne({ _id: route }).populate("bus");
 
-        if (!routing) return "Bus Route not found";
+    if (!routing) return "Bus Route not found";
 
-        routing.cordinates = cordinates;
-        routing.bus_from = bus_from;
-        routing.bus_to = bus_to;
-        
-        routing.save();
-    }, () =>  "Unable to fetch Databases");
+    routing.coordinates = coordinates;
+    routing.save();
+
+    return formatBusRouting(routing);
 }

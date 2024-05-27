@@ -9,7 +9,7 @@ const router = express.Router();
 
 router.use(`/auth`, authRoutes);
 router.use(`/drivers`, driversRoutes);
-router.use(`/buses`, busesRoutes);
+router.use(`/buses`, busesRoutes); 
 router.use(`/busroutes`, busRoutingRoutes);
 
 export default router;

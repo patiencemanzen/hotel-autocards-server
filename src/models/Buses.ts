@@ -22,7 +22,10 @@ const BusesSchema = new Schema<IBuses>({
     deletedAt: { type: Date },
 }, { timestamps: true });
 
+BusesSchema.pre<IBuses>('find', function() {
+  this.populate('driver');
+});
 
-const Buses = mongoose.model<IBuses>("Busess", BusesSchema);
+const Buses = mongoose.model<IBuses>("Buses", BusesSchema);
 
 export { IBuses, Buses };
