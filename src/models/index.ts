@@ -8,6 +8,7 @@ import {
   IBusRoutingPassengers,
   BusRoutingPassengers,
 } from "./BusRoutingPassengers";
+import { BusRoute, IBusRoute } from "./BusRoutes";
 
 export {
   IBuses,
@@ -24,4 +25,5 @@ export {
   Passenger,
   IBusRoutingPassengers,
   BusRoutingPassengers,
+  BusRoute, IBusRoute
 };

@@ -2,7 +2,7 @@
 import { Request, Response } from "express";
 import * as bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { User, IUserModel, Drivers, IDrivers } from "../models";
+import { User, IUserModel, Drivers, IDrivers, Buses, BusRoute } from "../models";
 import dotenv from "dotenv";
 import { validationResult } from "express-validator";
 import { tryCatch } from "../helpers/general-helpers";
@@ -11,6 +11,7 @@ import mongoose, { ObjectId } from "mongoose";
 import { generateAndStoreOTP } from "../utility/OTPUtil";
 import { sendDbNotification } from "../services/NotificationService";
 import { Passenger } from "../models/index";
+import { formatDriver } from "../routes/api/resources/DriverResource";
 
 dotenv.config();
 
@@ -299,10 +300,14 @@ export const driverSignin = async (req: Request, res: Response) => {
 
     const driverId: ObjectId = (driver as IDrivers)._id;
     const token = jwt.sign({ driverId: driverId }, authcode);
+    
+    const assignedBus = await Buses.findOne({ driver: driverId });
+    const assignedBusRoute = assignedBus ? await BusRoute.findOne({ bus: assignedBus?._id }) : null;
 
     res.status(201).send({
       status: "success",
-      driver: driver,
+      driver: formatDriver(driver),
+      assigned_bus: { bus: assignedBus, assigned_route: assignedBusRoute },
       access_token: token,
       message: "Driver authenticated successfully",
     });

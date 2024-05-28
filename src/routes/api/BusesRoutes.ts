@@ -10,5 +10,6 @@ const router = express.Router();
  * ----------------------------------------------
  */
 router.post('/', BusesRequest.create, BusesController.store);
+router.post('/assign-routes/:bus', BusesController.assignRoutes);
 
 export default router;
