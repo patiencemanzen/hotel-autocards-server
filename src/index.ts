@@ -9,13 +9,28 @@ import { MongoDBConnection, createDatabase } from './database/db';
 import routes from "./routes/index";
 import { createWebSocket, handleSocketConnection, handleSocketDisconnection } from './integrations/WebSocketModule';
 import { SocketHandler } from './services/WebSocketService';
+import connectMongoDBSession from 'connect-mongodb-session';
+
+const MongoDBStore = connectMongoDBSession(session);
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 4000;
 
-app.use(session({ secret: process.env.AUTH_SECRET_KEY, resave: true, saveUninitialized: true }));
+const store = new MongoDBStore({
+  uri: process.env.MONGODB_URI,
+  collection: 'appSessions'
+});
+
+app.use(session({ 
+  secret: process.env.AUTH_SECRET_KEY, 
+  resave: true, 
+  saveUninitialized: true,
+  store: store,
+  cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 }, // 1 week
+}));
+
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(bodyParser.json());
