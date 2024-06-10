@@ -1,7 +1,7 @@
 {
   "name": "parronaut-server",
   "version": "1.0.0",
-  "description": "schema sentry backend",
+  "description": "The server architecture for the map routing application includes key components for efficient, real-time service. The User Management Service handles login and profiles for passengers and drivers. The Real-Time Navigation Service uses Google Maps for routing and ETAs. The Driver Monitoring Service lets drivers track passengers and stops, while the Passenger Notification Service sends alerts for approaching stops and arrival times. Payment processing is integrated through the Payment Integration Service. Data is centrally managed with MongoDB. An API Gateway manages client requests, and the Monitoring and Analytics Service ensures system health and performance. This scalable, maintainable architecture uses cloud services, containerization, and real-time communication technologies.",
   "engines": {
     "node": "20.x",
     "npm": "10.x"
