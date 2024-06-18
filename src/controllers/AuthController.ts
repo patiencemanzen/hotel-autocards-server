@@ -35,7 +35,7 @@ const appName = process.env.APP_NAME;
  */
 export const signup = async (req: Request, res: Response) => {
   return tryCatch(async () => {
-      const { fullname, email, telephone, password } = req.body;
+      const { fullname, email, password } = req.body;
       const errors = validationResult(req);
 
       if (!errors.isEmpty()) {
@@ -47,9 +47,9 @@ export const signup = async (req: Request, res: Response) => {
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
+      
       const user = await User.create({
         fullname: fullname.trim().toLowerCase(),
-        telephone: telephone.trim().toLowerCase(),
         email, password: hashedPassword,
       });
 
@@ -58,7 +58,7 @@ export const signup = async (req: Request, res: Response) => {
       const token = jwt.sign(user.toObject(), authcode);
       const otp = generateAndStoreOTP(user);
 
-      sendDbNotification(email, telephone, 
+      sendDbNotification(email,
         `Welcome to ${appName}!`, `🎉 Dear ${user.fullname},\n\nWelcome to Our ${appName}! We're excited to have you on board. your OTP code ise ${otp}`,
         user
       );
@@ -192,7 +192,7 @@ export const requestOTPCode = async (req: Request, res: Response) => {
 
       const otp = generateAndStoreOTP(user);
 
-      sendDbNotification(email, "", `Your One-Time Password (OTP) for ${appName} Verification`, `Hello, \n Thank you for using our service. Your One-Time Password (OTP) for account verification is: \n [${otp}] \n Please use this code within the next [5 min] minutes. If you did not request this code, please ignore this email.`, user);
+      sendDbNotification(email, `Your One-Time Password (OTP) for ${appName} Verification`, `Hello, \n Thank you for using our service. Your One-Time Password (OTP) for account verification is: \n [${otp}] \n Please use this code within the next [5 min] minutes. If you did not request this code, please ignore this email.`, user);
      
       res.status(200).send({
         status: "success",

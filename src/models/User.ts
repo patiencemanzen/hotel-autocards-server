@@ -3,7 +3,7 @@ import mongoose, { Document, Schema } from "mongoose";
 interface IUserModel extends Document {
   fullname: string;
   email: string;
-  avatar: string;
+  avatar?: string;
   password: string;
   rememberToken: string;
   verified: boolean;
@@ -14,7 +14,7 @@ interface IUserModel extends Document {
 const userSchema = new Schema<IUserModel>({
   fullname: { type: String, trim: true },
   email: { type: String, required: true, unique: true, trim: true },
-  avatar: String,
+  avatar: { typr: String },
   password: { type: String, required: true },
   rememberToken: String,
   verified: { type: Boolean, default: false },

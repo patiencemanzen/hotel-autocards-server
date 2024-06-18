@@ -47,7 +47,7 @@ export const sendEmailNotifation = async (email: string, subject: string, messag
  * @param message 
  * @returns 
  */
-export const sendDbNotification = async (email: string, telephone: string, subject: string, message: string, user: IUserModel) => {
+export const sendDbNotification = async (email: string, subject: string, message: string, user: IUserModel, telephone?: string) => {
   await Notification.create({
     email: email,
     phoneNumber: telephone,
