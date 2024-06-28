@@ -3,12 +3,12 @@ import { updateDatabaseWithCoordinates } from '../controllers/WebSocketControlle
 import { BusRouting, BusRoutingPassengers, IBuses } from '../models';
 import { formatBusRouting } from '../routes/api/resources/BusRoutingResource';
 
-interface Bus {
-  id: string;
-  bus_from: { lat: number; lng: number };
-  bus_to: { lat: number; lng: number };
-  roomId: string;
-}
+// interface Bus {
+//   id: string;
+//   bus_from: { lat: number; lng: number };
+//   bus_to: { lat: number; lng: number };
+//   roomId: string;
+// }
 
 interface IBusInRouting {
     bus: IBuses;
@@ -63,7 +63,7 @@ export class SocketHandler {
      * @param data
      */
     handleWantToGoRequest() {
-        this.socket.on('want-to-go', async (data: { route: any, bus: Bus, user: any }) => {
+        this.socket.on('want-to-go', async (data: { route: any, bus: any, user: any }) => {
             try {
                 await BusRoutingPassengers.create({ busRouting: data.route, passenger: data.user._id });
                 this.socket.join(data.route);
@@ -76,6 +76,7 @@ export class SocketHandler {
 
     /**
      * Handle join route
+     * 
      * @param passengers 
      */
     handleJoinRoute(passengers: { [key: string]: string }) {

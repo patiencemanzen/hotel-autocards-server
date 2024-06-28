@@ -66,6 +66,7 @@ export const signup = async (req: Request, res: Response) => {
       res.status(201).send({
         status: "success",
         access_token: token,
+        user: user,
         message: "User registered successfully",
       });
     }, (error) => {
@@ -108,6 +109,7 @@ export const login = async (req: Request, res: Response) => {
 
       res.status(201).send({
         status: "success",
+        user: user,
         access_token: token,
         message: "User authenticated successfully",
       });
