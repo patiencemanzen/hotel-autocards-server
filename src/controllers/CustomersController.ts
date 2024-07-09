@@ -105,7 +105,8 @@ export const showCustomer = async (req: Request, res: Response) => {
       const { id } = req.params;
 
       const customer = await Customer.findOne({ _id: id });
-      const customerId = await CustomerId.findOne({ customer: id });
+      const customerId = await CustomerId.findOne({ customer: id }).populate('card_id');
+      const card = customerId ? await Card.findOne({ _id: customerId.card_id }) : null;
 
       if (!customer) {
         return res.status(404).send({
@@ -116,7 +117,7 @@ export const showCustomer = async (req: Request, res: Response) => {
 
       res.status(200).send({
         status: "success",
-        data: { customer: customer, customerId: customerId }, // Changed 'customer' to 'data' for clarity
+        data: { customer: customer, customerId: customerId, card }, // Changed 'customer' to 'data' for clarity
         message: "Customer found successfully",
       });
     },
