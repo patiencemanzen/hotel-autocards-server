@@ -1,29 +1,5 @@
-import { IBuses, Buses } from "./Buses";
-import { IBusRouting, BusRouting } from "./BusRoutings";
-import { IDrivers, Drivers } from "./Drivers";
-import { IUserModel, User } from "./User";
-import { Notification, INotification } from "./Notification";
-import { IPassenger, Passenger } from "./Passengers";
-import {
-  IBusRoutingPassengers,
-  BusRoutingPassengers,
-} from "./BusRoutingPassengers";
-import { BusRoute, IBusRoute } from "./BusRoutes";
+import { ICustomerModel, Customer } from "./Customer";
+import { ICustomerIds, CustomerId } from "./CustomerIds";
+import { ICardModel, Card } from "./Card";
 
-export {
-  IBuses,
-  Buses,
-  IBusRouting,
-  BusRouting,
-  IDrivers,
-  Drivers,
-  IUserModel,
-  User,
-  INotification,
-  Notification,
-  IPassenger,
-  Passenger,
-  IBusRoutingPassengers,
-  BusRoutingPassengers,
-  BusRoute, IBusRoute
-};
+export { ICustomerModel, Customer, CustomerId, ICustomerIds, Card, ICardModel };
