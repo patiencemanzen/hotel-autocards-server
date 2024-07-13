@@ -71,7 +71,11 @@ handleSocketDisconnection(webSocket, (socket) => {
 
 // New API endpoint to emit "server-created" event and call newCustomer
 app.post("/api/customers", async (req, res) => {
+  console.log("New card tapped");
+
   const { id } = req.body;
+
+  console.log("Tapped ID: ", id);
 
   const card = await Card.findOne({ serial_number: id });
 
